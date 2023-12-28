@@ -6,6 +6,19 @@ created to play with redis db
 import redis
 import uuid
 from typing import Union, Callable
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        key = method.__qualname__
+        if not self._redis.exists(key):
+            self._redis.set(key, 0)
+        result = method(self, *args, **kwargs)
+        self._redis.incr(key, 1)
+        return result
+    return wrapper
 
 
 class Cache:
@@ -13,6 +26,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         random_key = str(uuid.uuid4())
         self._redis.set(random_key, data)
