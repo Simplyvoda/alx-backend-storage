@@ -23,8 +23,8 @@ def counter(func: Callable) -> Callable:
         wrapper function to store key
         and value in redis
         """
-        redis_instance.incr(f'count:{url}')
-        result = redis_store.get(f'result:{url}')
+        redis_instance.incr(f'count:{args[0]}')
+        result = redis_store.get(f'result:{args[0]}')
         if result:
             return result.decode('utf-8')
         result = func(*args)
