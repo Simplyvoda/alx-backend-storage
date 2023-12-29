@@ -36,6 +36,3 @@ def get_page(url: str) -> str:
     and tracking the request.
     '''
     return requests.get(url).text
-    a url
-    """
-    return requests.get(url).text
