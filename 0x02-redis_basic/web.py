@@ -24,7 +24,7 @@ def counter(func: Callable) -> Callable:
         and value in redis
         """
         redis_instance.incr(f'count:{args[0]}')
-        result = redis_store.get(f'result:{args[0]}')
+        result = redis_instance.get(f'result:{args[0]}')
         if result:
             return result.decode('utf-8')
         result = func(*args)
