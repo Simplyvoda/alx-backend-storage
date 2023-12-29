@@ -28,12 +28,12 @@ def counter(func: Callable) -> Callable:
 
         if not redis_instance.exists(count_key):
             redis_instance.set(count_key, 0)
-            
+
         redis_instance.incr(count_key)
         result = redis_instance.get(result_key)
         if result:
             return result.decode('utf-8')
-        
+
         result = func(url)
         redis_instance.setex(result_key, 10, result)
         return result
