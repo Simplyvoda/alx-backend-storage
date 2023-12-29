@@ -5,11 +5,16 @@ that returns HTML content of a url
 """
 import redis
 import requests
+from typing import Callable
 
 redis_instance = redis.Redis()
 
 
-def counter(func):
+def counter(func: Callable) -> Callable:
+    """
+    decorator to store how many times
+    a url is accessed
+    """
     def wrapper(*args):
         result = func(*args)
         key = f"count:{args[0]}"
@@ -20,16 +25,17 @@ def counter(func):
             redis_instance.incr(key, 1)
         return result
     return wrapper
-                                                                                                
+
 
 @counter
 def get_page(url: str) -> str:
+    """
+    retrieves html content from
+    a url
+    """
     if url != "":
         response = requests.get(url)
         if response.status_code == 200:
             html_content = response.text
             return html_content
     return "Failed to retrieve the page"
-
-test_response = get_page("http://slowwly.robertomurray.co.uk")
-print(test_response)
