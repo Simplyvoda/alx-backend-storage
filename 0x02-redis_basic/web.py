@@ -41,7 +41,4 @@ def get_page(url: str) -> str:
     a url
     """
     if url != "":
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.text
-    return "Failed to retrieve the page"
+        return response = requests.get(url).text
