@@ -94,7 +94,7 @@ class Cache:
     def get(self, key: str, fn: Callable = None):
         """
         Performs a function on data
-        or returns data as is if key not
+        or returns data as is if fn not
         available
         """
         if not self._redis.exists(key):
