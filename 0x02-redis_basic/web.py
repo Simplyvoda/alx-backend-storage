@@ -18,18 +18,24 @@ def counter(func: Callable) -> Callable:
     a url is accessed
     """
     @wraps(func)
-    def wrapper(*args):
+    def wrapper(url: str) -> str:
         """
         wrapper function to store key
         and value in redis
         """
-        redis_instance.incr(f'count:{args[0]}')
-        result = redis_store.get(f'result:{args[0]}')
+        count_key = f"count:{url}"
+        result_key = f"result:{url}"
+
+        if not redis_instance.exists(count_key):
+            redis_instance.set(count_key, 0)
+            
+        redis_instance.incr(count_key)
+        result = redis_instance.get(result_key)
         if result:
             return result.decode('utf-8')
-        result = func(*args)
-        redis_instance.set(f'count:{args[0]}', 0)
-        redis_instance.setex(f'result:{args[0]}', 10, result)
+        
+        result = func(url)
+        redis_instance.setex(result_key, 10, result)
         return result
     return wrapper
 
