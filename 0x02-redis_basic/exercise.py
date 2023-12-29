@@ -10,6 +10,10 @@ from functools import wraps
 
 
 def count_calls(method: Callable) -> Callable:
+    """
+    decorator that returns number of times a method
+    is called
+    """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         key = method.__qualname__
@@ -22,6 +26,10 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
+    """
+    decorator that returns a log containing input and output
+    of method called
+    """
     @wraps(method)
     def wrapper(self, *args):
         input_key = f"{method.__qualname__}:inputs"
@@ -34,6 +42,10 @@ def call_history(method: Callable) -> Callable:
 
 
 def replay(self, method: Callable):
+    """
+    returns a summarised log of
+    method called
+    """
     method_name = method.__qualname__
     call_count = self._redis.get(method_name)
     input_key = f"{method_name}:inputs"
@@ -52,18 +64,34 @@ def replay(self, method: Callable):
 
 
 class Cache:
+    """
+    This class contains methods
+    that interact with redis
+    """
     def __init__(self):
+        """
+        initialises the class object
+        """
         self._redis = redis.Redis()
         self._redis.flushdb()
 
     @count_calls
     @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
+        """
+        stores a random key in redis with data
+        entered as an argument
+        """
         random_key = str(uuid.uuid4())
         self._redis.set(random_key, data)
         return random_key
 
     def get(self, key: str, fn: Callable = None):
+        """
+        Performs a function on data
+        or returns data as is if key not
+        available
+        """
         if not self._redis.exists(key):
             return None
 
@@ -74,7 +102,15 @@ class Cache:
             return data
 
     def get_str(self, key: str):
+        """
+        formats the data to return
+        a string
+        """
         return self.get(key, fn=lambda d: d.decode("utf-8"))
 
     def get_int(self, key: str):
+        """
+        formats data to return
+        int
+        """
         return self.get(key, fn=int)
