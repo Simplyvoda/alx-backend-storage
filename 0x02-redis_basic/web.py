@@ -6,6 +6,8 @@ that returns HTML content of a url
 import redis
 import requests
 from typing import Callable
+from functools import wraps
+
 
 redis_instance = redis.Redis()
 
@@ -15,15 +17,20 @@ def counter(func: Callable) -> Callable:
     decorator to store how many times
     a url is accessed
     """
+    @wraps(func)
     def wrapper(*args):
-        key = f"count:{args[0]}"
-        if redis_instance.exists(key):
-            redis_instance.incr(key, 1)
-            redis_instance.expire(key, 10)
-        else:
-            redis_instance.set(key, 0, ex=10)
-            redis_instance.incr(key, 1)
-        return func(*args)
+        """
+        wrapper function to store key
+        and value in redis
+        """
+        redis_instance.incr(f'count:{url}')
+        result = redis_store.get(f'result:{url}')
+        if result:
+            return result.decode('utf-8')
+        result = func(*args)
+        redis_instance.set(f'count:{args[0]}', 0)
+        redis_instance.setex(f'result:{args[0]}', 10, result)
+        return result
     return wrapper
 
 
