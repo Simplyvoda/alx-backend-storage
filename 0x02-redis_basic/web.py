@@ -40,5 +40,4 @@ def get_page(url: str) -> str:
     retrieves html content from
     a url
     """
-    if url != "":
-        return response = requests.get(url).text
+    return requests.get(url).text
