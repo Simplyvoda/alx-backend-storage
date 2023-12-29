@@ -41,20 +41,25 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-def replay(self, method: Callable):
+def replay(method: Callable):
     """
     returns a summarised log of
     method called
     """
+    if method is None or not hasattr(method, '__self__'):
+        return
+    redis_store = getattr(method.__self__, '_redis', None)
+    if not isinstance(redis_store, redis.Redis):
+        return
     method_name = method.__qualname__
-    call_count = self._redis.get(method_name)
+    call_count = redis_store.get(method_name)
     input_key = f"{method_name}:inputs"
     output_key = f"{method_name}:outputs"
 
     print(f"{method_name} was called {call_count.decode('utf-8')} times:")
 
-    input_list = self._redis.lrange(input_key, 0, -1)
-    output_list = self._redis.lrange(output_key, 0, -1)
+    input_list = redis_store.lrange(input_key, 0, -1)
+    output_list = redis_store.lrange(output_key, 0, -1)
 
     full_list = zip(input_list, output_list)
 
