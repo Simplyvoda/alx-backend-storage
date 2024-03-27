@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Initiating Redis
+Interacting with Redis NoSQL data storage
 """
 import redis
 import uuid
+from typing import Union
 
 
 class Cache:
