@@ -4,7 +4,7 @@ Interacting with Redis NoSQL data storage
 """
 import redis
 import uuid
-from typing import Union
+from typing import Union, Callable
 
 
 class Cache:
@@ -23,3 +23,26 @@ class Cache:
         random_key = str(uuid.uuid4())
         self._redis.set(random_key, data)
         return random_key
+
+
+    def get(
+            self,
+            key: str,
+            fn: Callable = None,
+            ) -> Union[str, bytes, int, float]:
+        '''Retrieves value from Redis storage
+        '''
+        data = self._redis.get(key)
+        return fn(data) if fn is not None else data
+
+
+    def get_str(self, key: str) -> str:
+        '''Converts value to string
+        '''
+        return self.get(key, lambda x: x.decode('utf-8'))
+
+
+    def get_int(self, key: str) -> int:
+        '''Converts value to integer
+        '''
+        return self.get(key, lambda x: int(x))
